@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI | Operations Command</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-deep: #030712;
+            --surface: #0f172a;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-dim: #64748b;
+            --border: #1e293b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background: var(--bg-deep); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navigation */
+        .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); padding: 30px 20px; display: flex; flex-direction: column; z-index: 50; }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 800; color: var(--accent); margin-bottom: 40px; text-decoration: none; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 14px; color: var(--text-dim); text-decoration: none; border-radius: 12px; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+        .nav-link:hover, .nav-link.active { background: var(--border); color: white; }
+        .nav-link.active { border-left: 4px solid var(--accent); }
+
+        /* Main Dashboard */
+        .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #1e293b, #030712); }
+        .header { padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: rgba(3, 7, 18, 0.5); backdrop-filter: blur(10px); }
+        .view-container { padding: 40px; max-width: 1500px; width: 100%; margin: 0 auto; }
+
+        /* Grid Layout */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; position: relative; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-8 { grid-column: span 8; }
+        .col-12 { grid-column: span 12; }
+
+        /* AI Interactive Elements */
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid currentColor; }
+        .bg-success { color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .bg-warning { color: var(--warning); background: rgba(245, 158, 11, 0.1); }
+
+        /* Autonomous Recovery UI */
+        .recovery-monitor { background: #020617; border-radius: 12px; padding: 15px; font-family: 'monospace'; font-size: 12px; height: 120px; overflow-y: auto; color: #38bdf8; border: 1px solid #1e293b; margin: 15px 0; }
+        
+        /* Buttons */
+        .btn-core { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+        .btn-core:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--accent-glow); }
+        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+
+        /* Activity Pulse Feed */
+        .pulse-feed { height: 350px; overflow-y: auto; }
+        .pulse-item { padding: 15px; border-left: 2px solid var(--accent); margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: 0 12px 12px 0; font-size: 13px; }
+        .pulse-meta { font-size: 10px; color: var(--text-dim); margin-bottom: 5px; }
+
+        /* GPS Visualization */
+        .gps-viz { height: 140px; background: #000; border-radius: 15px; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid var(--border); }
+        .radar { position: absolute; width: 80px; height: 80px; border: 1px solid var(--accent); border-radius: 50%; animation: ping 2s infinite; opacity: 0.5; }
+        @keyframes ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        select, textarea, input { background: #020617; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <a href="#" class="logo"><i data-lucide="activity"></i> CORE OPS</a>
+        
+        <div style="margin-bottom: 30px;">
+            <label style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-left: 14px;">Automation Hub</label>
+            <div style="margin-top:15px;">
+                <a href="#" class="nav-link active"><i data-lucide="layout-grid"></i> Control Center</a>
+                <a href="#" class="nav-link"><i data-lucide="message-square"></i> Messaging AI</a>
+                <a href="#" class="nav-link"><i data-lucide="mic"></i> Voice Lab</a>
+                <a href="#" class="nav-link"><i data-lucide="map-pin"></i> Field Analytics</a>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-left: 14px;">Maintenance</label>
+            <div style="margin-top:15px;">
+                <a href="#" class="nav-link"><i data-lucide="shield-check"></i> System Health</a>
+                <a href="#" class="nav-link"><i data-lucide="settings"></i> Prompt Config</a>
+            </div>
+        </div>
+
+        <div style="margin-top: auto; padding: 15px; background: rgba(56,189,248,0.05); border-radius: 15px; font-size: 11px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span>API Uptime</span>
+                <span style="color:var(--success)">99.98%</span>
+            </div>
+            <div style="height:4px; background:#020617; border-radius:2px;">
+                <div style="width:98%; height:100%; background:var(--success)"></div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div>
+                <h2 style="margin:0">Operations Intelligence Dashboard</h2>
+                <p style="color:var(--text-dim); font-size: 14px; margin-top: 4px;">Managing autonomous workflows for El Paso Water Quality.</p>
+            </div>
+            <div style="display:flex; gap:15px;">
+                <div class="status-badge bg-success">AI Models: Live</div>
+                <div class="status-badge bg-success">Webhooks: Active</div>
+            </div>
+        </header>
+
+        <div class="view-container">
+            <div class="dashboard-grid">
+                
+                <!-- FEATURE 1: Autonomous Recovery Engine -->
+                <div class="card col-4">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; font-size:16px;">Autonomous Recovery</h3>
+                        <i data-lucide="refresh-cw" size="18" style="color:var(--accent)"></i>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-dim);">Monitoring 3rd party API rate limits & handshake stability.</p>
+                    <div class="recovery-monitor" id="recovery-log">
+                        [Handshake] WhatsApp API: 200 OK<br>
+                        [Handshake] CRM Sync: 200 OK<br>
+                        [System] Awaiting data burst...
+                    </div>
+                    <button class="btn-core btn-ghost" onclick="triggerSimulatedRecovery()">
+                        Test Resilience Logic
+                    </button>
+                </div>
+
+                <!-- FEATURE 2: Sentiment-Driven Escalation -->
+                <div class="card col-4">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; font-size:16px;">Cognitive Sentiment</h3>
+                        <i data-lucide="heart-pulse" size="18" style="color:var(--danger)"></i>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; font-style: italic; font-size: 13px; color: var(--text-dim);" id="sentiment-text">
+                        "Your bot is confusing and I just want to speak to a real person!"
+                    </div>
+                    <div style="margin-top:15px; font-size:12px;">
+                        <strong>Action Taken:</strong> 
+                        <span style="color:var(--danger)" id="sentiment-action">Instant Human Escalation</span>
+                    </div>
+                    <button class="btn-core" style="margin-top:15px; background:var(--surface-light); border:1px solid var(--border);" onclick="toggleSentiment()">
+                        Simulate Positive Reply
+                    </button>
+                </div>
+
+                <!-- FEATURE 3: Behavioral GPS Analytics -->
+                <div class="card col-4">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; font-size:16px;">Behavioral Geofencing</h3>
+                        <i data-lucide="navigation" size="18" style="color:var(--warning)"></i>
+                    </div>
+                    <div class="gps-viz">
+                        <div class="radar"></div>
+                        <i data-lucide="map-pin" style="color:var(--accent); z-index:2;"></i>
+                    </div>
+                    <div style="margin-top:15px; font-size:12px;">
+                        <strong>Pattern Analysis:</strong> 
+                        <span style="color:var(--warning)" id="gps-report">Unit 09: Potential Idle Bypass Detected</span>
+                    </div>
+                    <button class="btn-core btn-ghost" style="margin-top:10px;" onclick="resetGPS()">
+                        Acknowledge Pattern
+                    </button>
+                </div>
+
+                <!-- FEATURE 4: Neural Activity Feed -->
+                <div class="card col-8">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0; font-size:16px;">Neural Pulse Feed (Real-Time)</h3>
+                        <div class="status-badge bg-success">Stream: Live</div>
+                    </div>
+                    <div class="pulse-feed" id="main-pulse">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- FEATURE 5: Multi-Model Prompt Lab -->
+                <div class="card col-4">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; font-size:16px;">Prompt Governance</h3>
+                        <i data-lucide="brain" size="18" style="color:var(--accent)"></i>
+                    </div>
+                    <label>ACTIVE PERSONALITY</label>
+                    <select id="personality" onchange="updatePrompt()">
+                        <option value="pro">Enterprise Professional</option>
+                        <option value="friendly">Customer Success Friendly</option>
+                        <option value="urgent">Campaign Urgency Mode</option>
+                    </select>
+                    <textarea id="prompt-preview" rows="5" readonly>SYSTEM: Act as a senior water quality consultant. Prioritize appointment confirmation and answer technical questions about filtration with high precision.</textarea>
+                    <button class="btn-core" style="margin-top:15px;" onclick="pushPulse('System', 'Prompt weights updated globally.')">Deploy Prompt Changes</button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Recovery Engine Logic
+        function triggerSimulatedRecovery() {
+            const log = document.getElementById('recovery-log');
+            log.innerHTML += `<br><span style="color:var(--danger)">[ALERT] CRM API Rate Limit (429) Detected.</span>`;
+            log.innerHTML += `<br><span style="color:var(--warning)">[RECOVERY] Circuit Breaker Active. Retrying in 5s...</span>`;
+            log.scrollTop = log.scrollHeight;
+
+            pushPulse("Recovery Engine", "CRM API failure handled via Exponential Backoff.");
+
+            setTimeout(() => {
+                log.innerHTML += `<br><span style="color:var(--success)">[SUCCESS] Connection Restored. Polling adjusted.</span>`;
+                log.scrollTop = log.scrollHeight;
+            }, 5000);
+        }
+
+        // 2. Sentiment Logic
+        function toggleSentiment() {
+            const box = document.getElementById('sentiment-text');
+            const action = document.getElementById('sentiment-action');
+            
+            box.innerText = "Thanks! I'm very excited for the test tomorrow.";
+            action.innerText = "Auto-Confirmation Sequence Logged";
+            action.style.color = "var(--success)";
+            
+            pushPulse("Sentiment AI", "Analyzed reply as 'Positive'. Triggering standard workflow.");
+        }
+
+        // 3. Prompt Lab Logic
+        function updatePrompt() {
+            const mode = document.getElementById('personality').value;
+            const area = document.getElementById('prompt-preview');
+            const prompts = {
+                pro: "SYSTEM: Act as a senior water quality consultant. Prioritize appointment confirmation and answer technical questions about filtration with high precision.",
+                friendly: "SYSTEM: Be a welcoming representative. Make the customer feel excited about their free water test. Use friendly, accessible language.",
+                urgent: "SYSTEM: Focus on booking immediate slots. Emphasize that free testing availability is limited for this zip code today."
+            };
+            area.value = prompts[mode];
+        }
+
+        // 4. Activity Pulse Feed
+        function pushPulse(source, msg) {
+            const feed = document.getElementById('main-pulse');
+            const item = document.createElement('div');
+            item.className = 'pulse-item';
+            item.innerHTML = `
+                <div class="pulse-meta">${new Date().toLocaleTimeString()} • ${source}</div>
+                <div>${msg}</div>
+            `;
+            feed.prepend(item);
+        }
+
+        function resetGPS() {
+            document.getElementById('gps-report').innerText = "Unit 09: Patterns Normalized";
+            document.getElementById('gps-report').style.color = "var(--success)";
+            pushPulse("Geo-AI", "Recalibrated geofence for Unit 09. Anomaly cleared.");
+        }
+
+        // Initial Pulses
+        pushPulse("Kernel", "Enterprise Automation OS initialized.");
+        pushPulse("Supabase", "Real-time database sync established.");
+    </script>
+</body>
+</html>
